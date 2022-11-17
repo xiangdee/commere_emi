@@ -86,6 +86,11 @@ const App = () => {
           <Route path="/checkout" exact>
             <Checkout cart={cart} order={order} onCaptureCheckout={handleCaptureCheckout} error={errorMessage} />
           </Route>
+
+          <Route path="/pay-bitcoin" exact>
+            <Checkout cart={cart} order={order} onCaptureCheckout={handleCaptureCheckout} error={errorMessage} />
+          </Route>
+          
         </Switch>
       </div>
     </Router>
