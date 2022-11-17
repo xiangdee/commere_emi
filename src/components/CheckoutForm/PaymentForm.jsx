@@ -1,40 +1,26 @@
-import { useHistory } from 'react-router-dom';
 import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { Typography, Divider, FormControlLabel,FormControl, Radio, RadioGroup ,Box} from '@material-ui/core';
+import { Typography, Divider, FormControlLabel, FormControl, Radio, RadioGroup, Box } from '@material-ui/core';
 import { Elements, CardElement, ElementsConsumer } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CoinbaseCommerceButton from 'react-coinbase-commerce';
 import 'react-coinbase-commerce/dist/coinbase-commerce-button.css';
-
 import Review from './Review';
+
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  paper: {
-    padding: theme.spacing(2),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-  },
-}));
 
 const PaymentForm = ({ checkoutToken, nextStep, backStep, shippingData, onCaptureCheckout }) => {
-  const  [payType, setPayType] = useState(1);
+  const [payType, setPayType] = useState(1);
+  const customMetadata = [{
+    pricing_type: 'fixed_price',
+    local_price: {
+      amount: '100',
+      currency: 'USD',
+    },
+  }];
   const setPaymentMethod = (e) => {
-    setPayType(parseInt(e.target.value));    
-    }
-    const history = useHistory();
-
-  const classes = useStyles();
-  const customMetadata = {
-    'pricing_type': 'fixed_price',
-    'local_price': {
-      'amount': '100.00',
-      'currency': 'USD'
-  }
+    setPayType(Number(e.target.value));
+    return false;
   }
   const handleSubmit = async (event, elements, stripe) => {
     event.preventDefault();
@@ -60,9 +46,7 @@ const PaymentForm = ({ checkoutToken, nextStep, backStep, shippingData, onCaptur
           },
         },
       };
-
       onCaptureCheckout(checkoutToken.id, orderData);
-
       nextStep();
     }
   }
@@ -73,66 +57,58 @@ const PaymentForm = ({ checkoutToken, nextStep, backStep, shippingData, onCaptur
       <Divider />
       <Typography variant="h6" gutterBottom style={{ margin: '20px 0' }}>Payment method</Typography>
 
+      <FormControl component="fieldset" mb={2} pb={2}>
+        <RadioGroup row aria-label="position" name="position" value={payType} defaultValue={1} onChange={(e) => { setPaymentMethod(e); }}>
+          <FormControlLabel
+            value={1}
+            control={<Radio color="primary" />}
+            labelPlacement="End"
+            label="Credit Card"
+          />
 
-          <FormControl component="fieldset" mb={2} pb={2}>
-            <RadioGroup row aria-label="position" name="position" value={payType} defaultValue={1}
-            onChange={(e) => {setPaymentMethod(e)}}>
-                <FormControlLabel
-                  value={1}
-                  control={<Radio color="primary" />}
-                  labelPlacement="End"
-                  label="Credit Card"
-                >
-                </FormControlLabel> 
+          <FormControlLabel
+            value={2}
+            control={<Radio color="primary" />}
+            labelPlacement="End"
+            label="Bitcoin"
+          />
 
-                <FormControlLabel
-                  value={2}
-                  control={<Radio color="primary" />}
-                  labelPlacement="End"
-                  label="Bitcoin"
-                 
-                >
-                </FormControlLabel> 
-
-            </RadioGroup> 
-             
-          </FormControl>
+        </RadioGroup>
+      </FormControl>
 
       <>
-      { payType === 2  ? <>
+        { payType === 2
+          ? (
+            <div>
               <Box display="flex" justifyContent="center" m={1} p={1} bgcolor="background.paper">
-                      <div>
-                        {checkoutToken.live.total.formatted_with_symbol}
-                      </div>
-                </Box>
-                  <Box display="flex" justifyContent="center" m={1} p={1} bgcolor="background.paper">
-
-                <CoinbaseCommerceButton checkoutId={'86827167-ed99-4ee6-93fb-30222f2fea66'} styled="true" customMetadata={customMetadata}/>
-
-                </Box>
-                </> : 
-                <>
-                  <Elements stripe={stripePromise}>
-                    <ElementsConsumer>{({ elements, stripe }) => (
-                      <form onSubmit={(e) => handleSubmit(e, elements, stripe)}>
-                        <CardElement />
-                        <br /> <br />
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Button variant="outlined" onClick={backStep}>Back</Button>
-                          <Button type="submit" variant="contained" disabled={!stripe} color="primary">
-                            Pay {checkoutToken.live.subtotal.formatted_with_symbol}
-                          </Button>
-                        </div>
-                      </form>
-                    )}
-                    </ElementsConsumer>
-                  </Elements>
-                </>
-               
-                
-            
-       
-      }
+                <div>
+                  {checkoutToken.live.total.formatted_with_symbol}
+                </div>
+              </Box>
+              <Box display="flex" justifyContent="center" m={1} p={1} bgcolor="background.paper">
+                <CoinbaseCommerceButton checkoutId="86827167-ed99-4ee6-93fb-30222f2fea66" styled="true" customMetadata={customMetadata} />
+              </Box>
+            </div>
+          )
+          : (
+            <>
+              <Elements stripe={stripePromise}>
+                <ElementsConsumer>{({ elements, stripe }) => (
+                  <form onSubmit={(e) => handleSubmit(e, elements, stripe)}>
+                    <CardElement />
+                    <br /> <br />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Button variant="outlined" onClick={backStep}>Back</Button>
+                      <Button type="submit" variant="contained" disabled={!stripe} color="primary">
+                        Pay {checkoutToken.live.subtotal.formatted_with_symbol}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+                </ElementsConsumer>
+              </Elements>
+            </>
+          )}
       </>
     </>
   );
