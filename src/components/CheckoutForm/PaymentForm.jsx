@@ -18,10 +18,6 @@ const PaymentForm = ({ checkoutToken, nextStep, backStep, shippingData, onCaptur
       currency: 'USD',
     },
   }];
-  const setPaymentMethod = (e) => {
-    setPayType(Number(e.target.value));
-    return false;
-  }
   const handleSubmit = async (event, elements, stripe) => {
     event.preventDefault();
 
@@ -58,7 +54,7 @@ const PaymentForm = ({ checkoutToken, nextStep, backStep, shippingData, onCaptur
       <Typography variant="h6" gutterBottom style={{ margin: '20px 0' }}>Payment method</Typography>
 
       <FormControl component="fieldset" mb={2} pb={2}>
-        <RadioGroup row aria-label="position" name="position" value={payType} defaultValue={1} onChange={(e) => { setPaymentMethod(e); }}>
+        <RadioGroup row aria-label="position" name="position" value={payType} defaultValue={1} onChange={(e) => { setPayType(Number(e.target.value)); }}>
           <FormControlLabel
             value={1}
             control={<Radio color="primary" />}

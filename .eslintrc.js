@@ -23,6 +23,7 @@ module.exports = {
     'react',
   ],
   rules: {
+    "semi": 0,
     "import/no-extraneous-dependencies": ["error",  {"devDependencies": true}],
     "react/jsx-props-no-spreading": "off",
     'import/extensions': 0,
